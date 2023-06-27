@@ -21,3 +21,14 @@ B.
 3. Click on "Create placement group"
 4. Give it a name and choose the "Spread" placement strategy because the requirement is high availability as top priority
 5. Click on "Create group"
+
+### Solution using Terraform
+```
+resource "aws_placement_group" "example_placement_grp" {
+    name = "example-placement-grp"
+    strategy = "spread" #or cluster
+}
+
+placement_group = aws_placement_group.example_placement_grp.name #this has to be added to our previously created EC2 instance resource block
+
+```
