@@ -27,3 +27,18 @@ One EC2 instance that you can get rid of :)
 8. The default EBS volume (created when you launched the instance for the first time) will be deleted (unless you didn't check "Delete on termination"), but the volume you've created as part of this exercise, will remain
 
 Note: don't forget to remove the EBS volume you've created in this exercise
+
+### Solution using Terraform
+```
+resource "aws_ebs_volume" "example_volume" {
+  availability_zone = aws_instance.ec2_instance.availability_zone
+  size              = 4
+  type              = "gp2"
+}
+
+resource "aws_volume_attachment" "example_volume_attachment" {
+  device_name = "/dev/sdh"
+  volume_id   = aws_ebs_volume.example_volume.id
+  instance_id = aws_instance.ec2_instance.id
+}
+```
