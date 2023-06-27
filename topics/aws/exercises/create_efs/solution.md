@@ -25,3 +25,24 @@ Two EC2 instances in different availability zones
   2. Run `mkdir efs`
   3. If you go to your EFS page and click on "Attach", you can see what ways are there to mount your EFS on your instancess
     1. The command to mount the EFS should be similar to `sudo mount -t efs -o tls <EFS name>:/ efs` - copy and paste it in your ec2 instance's OS
+
+### Soution using Terraform
+```
+resource "aws_efs_file_system" "efs" {
+  creation_token = "my-efs"
+
+  lifecycle_policy {
+    transition_to_ia = "AFTER_60_DAYS"
+  }
+}
+
+resource "aws_efs_mount_target" "mount_target1" {
+  file_system_id  = aws_efs_file_system.efs.id
+  subnet_id       = aws_instance.ec2_instance.subnet_id  
+}
+
+resource "aws_efs_mount_target" "mount_target2" {
+  file_system_id  = aws_efs_file_system.efs.id
+  subnet_id       = aws_instance.ec2_instance_2.subnet_id  
+}
+```
