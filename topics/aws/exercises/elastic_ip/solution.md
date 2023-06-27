@@ -26,3 +26,21 @@
   5. Now, if we go back to the instance page, we can see it is using the Elastic IP address as its public IP
 
 Note: to remove it, use "disassociate" option and don't forget to also release it so you won't be billed.
+
+### Solution using Terraform:
+Adding a public IP address to our previously created EC2 instance
+```
+associate_public_ip_address = true
+```
+
+Adding an elastic IP address to our previously created EC2 instance:
+```
+resource "aws_eip" "example_eip" {
+  domain = "vpc"
+}
+
+resource "aws_eip_association" "example_eip_association" {
+  instance_id   = aws_instance.ec2_instance.id
+  allocation_id = aws_eip.example_eip.id
+}
+```
