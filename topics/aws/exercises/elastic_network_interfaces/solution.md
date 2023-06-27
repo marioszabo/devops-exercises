@@ -23,3 +23,17 @@ A.
 
 B.
 1. You can move the second network interface between instances. This allows us to create kind of a failover mechanism between the instances.
+
+### Solution using Terraform
+```
+resource "aws_network_interface" "additional_interface" {
+  subnet_id       = aws_instance.ec2_instance.subnet_id
+  security_groups = [aws_security_group.web_sg.id]
+}
+
+resource "aws_network_interface_attachment" "additional_interface_attachment" {
+  instance_id         = aws_instance.ec2_instance.id
+  network_interface_id = aws_network_interface.additional_interface.id
+  device_index        = 1
+}
+```
