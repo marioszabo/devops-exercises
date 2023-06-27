@@ -19,3 +19,37 @@
 3. Click on "Actions" -> "Security" -> "Modify IAM Role" 
 4. Choose the IAM role with "IAMReadOnlyAccess" policy and click on "Save"
 5. Running AWS commands now in the instance should work fine (e.g. `aws iam list-users`)
+
+
+### Solution Using Terrform
+```
+resource "aws_iam_role" "ec2_role" {
+  name               = "EC2Role"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_role_attachment" {
+  role       = aws_iam_role.ec2_role.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+}
+
+resource "aws_iam_instance_profile" "ec2_instance_profile" {
+  name = aws_iam_role.ec2_role.name
+  role = aws_iam_role.ec2_role.name
+}
+
+iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name #this has to go inside your EC2 reosurce block
+ ```
