@@ -14,3 +14,37 @@ In the end, run from the CLI (or CloudShell) the command to verify the role was 
 4. In permissions page, check "IAMFullAccess" and click on "Next" until you get to "Review" page
 5. In the "Review" page, give the role a name (e.g. IAMFullAcessEC2), provide a short description and click on "Create role"
 6. `aws iam list-roles` will list all the roles in the account, including the one we've just created.
+
+### Solution using Terraform:
+```
+resource "aws_iam_role" "ec2_iam_role" {
+  name               = "EC2IAMRole"
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ec2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "ec2_iam_policy_attachment" {
+  role       = aws_iam_role.ec2_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMFullAccess"
+}
+
+/*
+Alternatively if you have the policy in a JSON file you can modify it like this:
+resource "aws_iam_role" "ec2_iam_role" {
+  name               = "EC2IAMRole"
+  assume_role_policy = file("${path.module}/assume_role_policy.json")
+}
+*/
+```
