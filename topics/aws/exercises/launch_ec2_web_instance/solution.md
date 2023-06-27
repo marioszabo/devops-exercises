@@ -37,3 +37,43 @@ echo "<h1>I made it! This is is awesome!</h1>" > /var/www/html/index.html
 9. In the security group section, add a rule to accept HTTP traffic (TCP) on port 80 from anywhere
 10. Click on "Review" and then click on "Launch" after reviewing.
 11. If you don't have a key pair, create one and download it.
+
+### Solution using Terraform
+```
+resource "aws_security_group" "web_sg" {
+  name        = "web-sg"
+  description = "Security group for web traffic"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "ec2_instance" {
+  ami                    = "ami-0b2ac948e23c57071" # Amazon Linux 2 AMI ID
+  instance_type          = "t2.micro"              # Instance type with 1 vCPU and 1 GiB memory
+  vpc_security_group_ids = [aws_security_group.web_sg.id]
+
+  root_block_device {
+    volume_type           = "gp2"
+    delete_on_termination = true
+  }
+
+  user_data = <<-EOF
+   yum update -y
+    yum install -y httpd
+    systemctl start httpd
+    systemctl enable httpd
+    echo "<h1>I made it! This is is awesome!</h1>" > /var/www/html/index.html
+  EOF
+
+
+  tags = {
+    "Type" = "web"
+    "Name" = "web-1"
+  }
+}
+```
