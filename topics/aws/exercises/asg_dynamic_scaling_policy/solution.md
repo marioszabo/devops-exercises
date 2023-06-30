@@ -35,3 +35,23 @@ stress -c 4  # assuming you have 4 CPUs
 
 1. Simply stop the stress command
 2. Yes, one of the EC2 instances was terminated
+
+### Solution using Terraform
+```
+resource "aws_autoscaling_policy" "cpu_scaling_policy" {
+  name                   = "cpu-scaling-policy"
+  autoscaling_group_name = aws_autoscaling_group.web_servers.name  # Replace with the name of your existing Auto Scaling Group
+
+  adjustment_type         = "ChangeInCapacity"
+  policy_type             = "TargetTrackingScaling"
+
+
+  metric_aggregation_type = "Average"
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+    target_value = 70.0
+  }
+}
+```
