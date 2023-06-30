@@ -40,3 +40,22 @@
 1. Go to the database under "Databases" in the left side menu
 2. Click on "Actions" -> Create read replica
 3. Click on "Create read replica"
+
+### Solution using Terraform
+```
+
+resource "aws_db_instance" "mysql_db" {
+  allocated_storage       = 10
+  max_allocated_storage   = 15
+  storage_type            = "gp2"
+  engine                  = "mysql"
+  engine_version          = "8.0.23"
+  instance_class          = "db.t2.micro"
+  publicly_accessible     = true
+  port                    = 3306
+  db_name                 = "db"
+  backup_retention_period = 10
+  username = "admin"
+  password = "admin123"
+}
+```
