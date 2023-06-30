@@ -46,3 +46,42 @@ A.
 B. One instance was launched to met the criteria of the auto scaling group we've created. The reason it launched only one is due to "Desired capacity" set to 1.
 C. Change it by going to your auto scaling group -> Details -> Edit -> "2 desired capacity". This should create another instance if only one is running
 D. Reducing desired capacity back to 1 will terminate one of the instances (assuming 2 are running).
+
+### Solution using Terraform
+
+```
+resource "aws_launch_configuration" "web_servers" {
+  name          = "web-servers-lc"
+  image_id      = "ami-0b2ac948e23c57071" # Amazon Linux 2 AMI ID
+  instance_type = "t2.micro"
+
+  user_data = <<-EOF
+    #!/bin/bash
+    yum install -y httpd
+    systemctl start httpd
+    systemctl enable httpd
+  EOF
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_autoscaling_group" "web_servers" {
+  name                      = "web-servers-asg"
+  min_size                  = 1
+  max_size                  = 3
+  desired_capacity          = 2
+  health_check_type         = "ELB"
+  launch_configuration      = aws_launch_configuration.web_servers.name
+  vpc_zone_identifier       = ["subnet-0a51cc2d7b610c874"] # Replace with the subnet ID(s) where you want to launch the instances
+  termination_policies      = ["Default"]
+  wait_for_capacity_timeout = "10m"
+
+  tag {
+    key                 = "Name"
+    value               = "web-server"
+    propagate_at_launch = true
+  }
+}
+```
